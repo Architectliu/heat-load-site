@@ -283,7 +283,7 @@ export default function HeatCoolingLoadInteractiveSite() {
     <div className="min-h-screen bg-[#f5f5f7] p-6 md:p-10">
       <div className="mx-auto max-w-[1550px] space-y-8">
         <div className="rounded-[30px] border border-black/5 bg-white/80 px-7 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-          <div className="text-[11px] uppercase tracking-[0.22em] text-sky-600/70">Apple-style HMI · Light Mode</div>
+      
           <div className="mt-2 flex items-end justify-between gap-6">
             <div>
               <h1 className="text-3xl md:text-[2.55rem] font-semibold tracking-tight text-slate-900">
