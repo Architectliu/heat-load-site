@@ -8,7 +8,26 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Building2, SunMedium, Square, Blinds, Shield, Wind, Zap } from 'lucide-react';
 
-const programCategories = {
+type Space = {
+  name: string;
+  heatingBase: number;
+  coolingBase: number;
+};
+
+type ProgramCategory = {
+  name: string;
+  spaces: Record<string, Space>;
+};
+
+type FactorOption = {
+  name: string;
+  heatingFactor: number;
+  coolingFactor: number;
+  heatingRange?: string;
+  coolingRange?: string;
+};
+
+const programCategories: Record<string, ProgramCategory> = {
   residential: {
     name: 'Residential',
     spaces: {
@@ -163,60 +182,60 @@ const programCategories = {
   },
 };
 
-const climateOptions = {
+const climateOptions: Record<string, FactorOption> = {
   cold: { name: 'Cold (Zone 5–7, Chicago)', heatingFactor: 1.35, coolingFactor: 0.9, heatingRange: '1.2–1.5', coolingRange: '0.8–1.0' },
   mixed: { name: 'Mixed (Zone 3–4, NYC)', heatingFactor: 1.0, coolingFactor: 1.0, heatingRange: '1.0', coolingRange: '1.0' },
   hotHumid: { name: 'Hot-humid (Zone 1–2, Miami)', heatingFactor: 0.8, coolingFactor: 1.35, heatingRange: '0.7–0.9', coolingRange: '1.2–1.5' },
   hotDry: { name: 'Hot-dry (Phoenix)', heatingFactor: 0.9, coolingFactor: 1.2, heatingRange: '0.8–1.0', coolingRange: '1.1–1.3' },
 };
 
-const wwrOptions = {
+const wwrOptions: Record<string, FactorOption> = {
   low: { name: '< 20%', heatingFactor: 0.95, coolingFactor: 0.85, heatingRange: '0.9–1.0', coolingRange: '0.8–0.9' },
   baseline: { name: '20–40%', heatingFactor: 1.0, coolingFactor: 1.0, heatingRange: '1.0', coolingRange: '1.0' },
   medium: { name: '40–60%', heatingFactor: 1.2, coolingFactor: 1.3, heatingRange: '1.1–1.3', coolingRange: '1.2–1.4' },
   high: { name: '> 60%', heatingFactor: 1.45, coolingFactor: 1.75, heatingRange: '1.3–1.6', coolingRange: '1.5–2.0' },
 };
 
-const shadingOptions = {
+const shadingOptions: Record<string, FactorOption> = {
   none: { name: 'None', heatingFactor: 1.0, coolingFactor: 1.0, coolingRange: '1.0' },
   internal: { name: 'Internal (curtain)', heatingFactor: 1.0, coolingFactor: 0.925, coolingRange: '0.9–0.95' },
   external: { name: 'External (louver)', heatingFactor: 1.0, coolingFactor: 0.775, coolingRange: '0.7–0.85' },
   dynamic: { name: 'Dynamic shading', heatingFactor: 1.0, coolingFactor: 0.7, coolingRange: '0.6–0.8' },
 };
 
-const envelopeOptions = {
+const envelopeOptions: Record<string, FactorOption> = {
   poor: { name: 'Poor (old building)', heatingFactor: 1.45, coolingFactor: 1.15, heatingRange: '1.3–1.6', coolingRange: '1.1–1.2' },
   standard: { name: 'Standard (code)', heatingFactor: 1.0, coolingFactor: 1.0, heatingRange: '1.0', coolingRange: '1.0' },
   highPerformance: { name: 'High-performance', heatingFactor: 0.7, coolingFactor: 0.85, heatingRange: '0.6–0.8', coolingRange: '0.8–0.9' },
 };
 
-const airOptions = {
+const airOptions: Record<string, FactorOption> = {
   tight: { name: 'Tight (0.1–0.3 ACH)', heatingFactor: 0.8, coolingFactor: 0.85, heatingRange: '0.7–0.9', coolingRange: '0.8–0.9' },
   typical: { name: 'Typical (0.3–0.7 ACH)', heatingFactor: 1.0, coolingFactor: 1.0, heatingRange: '1.0', coolingRange: '1.0' },
   leaky: { name: 'Leaky (>1.0 ACH)', heatingFactor: 1.35, coolingFactor: 1.2, heatingRange: '1.2–1.5', coolingRange: '1.1–1.3' },
   highVent: { name: 'High ventilation (lab / hospital)', heatingFactor: 1.65, coolingFactor: 1.9, heatingRange: '1.3–2.0', coolingRange: '1.3–2.5' },
 };
 
-const internalGainOptions = {
+const internalGainOptions: Record<string, FactorOption> = {
   low: { name: 'Low (residential)', heatingFactor: 1.15, coolingFactor: 0.85, heatingRange: '1.1–1.2', coolingRange: '0.8–0.9' },
   medium: { name: 'Medium (office)', heatingFactor: 1.0, coolingFactor: 1.0, heatingRange: '1.0', coolingRange: '1.0' },
   high: { name: 'High (commercial)', heatingFactor: 0.85, coolingFactor: 1.35, heatingRange: '0.8–0.9', coolingRange: '1.2–1.5' },
   extreme: { name: 'Extreme (kitchen / data center)', heatingFactor: 0.65, coolingFactor: 2.25, heatingRange: '0.5–0.8', coolingRange: '1.5–3.0' },
 };
 
-function clamp(n, min, max) {
+function clamp(n: number, min: number, max: number) {
   return Math.min(Math.max(n, min), max);
 }
 
 export default function HeatCoolingLoadInteractiveSite() {
-  const [category, setCategory] = useState('residential');
-  const [space, setSpace] = useState('apartment');
-  const [climate, setClimate] = useState('mixed');
-  const [wwr, setWwr] = useState('baseline');
-  const [shading, setShading] = useState('none');
-  const [envelope, setEnvelope] = useState('standard');
-  const [air, setAir] = useState('typical');
-  const [internalGain, setInternalGain] = useState('medium');
+  const [category, setCategory] = useState<string>('residential');
+  const [space, setSpace] = useState<string>('apartment');
+  const [climate, setClimate] = useState<string>('mixed');
+  const [wwr, setWwr] = useState<string>('baseline');
+  const [shading, setShading] = useState<string>('none');
+  const [envelope, setEnvelope] = useState<string>('standard');
+  const [air, setAir] = useState<string>('typical');
+  const [internalGain, setInternalGain] = useState<string>('medium');
 
   const currentCategory = programCategories[category];
   const currentSpace = currentCategory.spaces[space];
@@ -231,18 +250,34 @@ export default function HeatCoolingLoadInteractiveSite() {
     const internalF = internalGainOptions[internalGain];
 
     return {
-      heating: Math.round(clamp(
-        p.heatingBase * climateF.heatingFactor * wwrF.heatingFactor * shadingF.heatingFactor * envelopeF.heatingFactor * airF.heatingFactor * internalF.heatingFactor,
-        5,
-        320,
-      )),
-      cooling: Math.round(clamp(
-        p.coolingBase * climateF.coolingFactor * wwrF.coolingFactor * shadingF.coolingFactor * envelopeF.coolingFactor * airF.coolingFactor * internalF.coolingFactor,
-        5,
-        6000,
-      )),
+      heating: Math.round(
+        clamp(
+          p.heatingBase *
+            climateF.heatingFactor *
+            wwrF.heatingFactor *
+            shadingF.heatingFactor *
+            envelopeF.heatingFactor *
+            airF.heatingFactor *
+            internalF.heatingFactor,
+          5,
+          320,
+        ),
+      ),
+      cooling: Math.round(
+        clamp(
+          p.coolingBase *
+            climateF.coolingFactor *
+            wwrF.coolingFactor *
+            shadingF.coolingFactor *
+            envelopeF.coolingFactor *
+            airF.coolingFactor *
+            internalF.coolingFactor,
+          5,
+          6000,
+        ),
+      ),
     };
-  }, [category, space, climate, wwr, shading, envelope, air, internalGain]);
+  }, [currentSpace, climate, wwr, shading, envelope, air, internalGain]);
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] p-6 md:p-10">
@@ -251,13 +286,15 @@ export default function HeatCoolingLoadInteractiveSite() {
           <div className="text-[11px] uppercase tracking-[0.22em] text-sky-600/70">Apple-style HMI · Light Mode</div>
           <div className="mt-2 flex items-end justify-between gap-6">
             <div>
-              <h1 className="text-3xl md:text-[2.55rem] font-semibold tracking-tight text-slate-900">Interactive Heat & Cooling Load Builder</h1>
-              <p className="mt-2 max-w-4xl text-sm md:text-[15px] leading-6 text-slate-500">
-                Program input stays unchanged. Load output is modified by six factors: climate, WWR, shading, envelope,
-                infiltration / ventilation, and internal gains.
+              <h1 className="text-3xl md:text-[2.55rem] font-semibold tracking-tight text-slate-900">
+                Interactive Heat & Cooling Load Builder
+              </h1>
+              <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-500 md:text-[15px]">
+                Program input stays unchanged. Load output is modified by six factors: climate, WWR, shading,
+                envelope, infiltration / ventilation, and internal gains.
               </p>
             </div>
-            <div className="hidden lg:flex items-center gap-2 rounded-full border border-black/5 bg-[#f0f7ff] px-3 py-2 text-xs text-slate-600">
+            <div className="hidden items-center gap-2 rounded-full border border-black/5 bg-[#f0f7ff] px-3 py-2 text-xs text-slate-600 lg:flex">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
               Live preview
             </div>
@@ -268,10 +305,12 @@ export default function HeatCoolingLoadInteractiveSite() {
           <LightPanel>
             <CardHeader className="border-b border-black/5 px-6 py-5">
               <CardTitle className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900">
-                <Building2 className="h-5 w-5 text-sky-600" /> Program Input
+                <Building2 className="h-5 w-5 text-sky-600" />
+                Program Input
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-5 flex-1 flex flex-col px-6 py-6">
+
+            <CardContent className="flex flex-1 flex-col space-y-5 px-6 py-6">
               <Select
                 value={category}
                 onValueChange={(value) => {
@@ -285,7 +324,9 @@ export default function HeatCoolingLoadInteractiveSite() {
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-black/5 bg-white text-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
                   {Object.entries(programCategories).map(([key, value]) => (
-                    <SelectItem key={key} value={key}>{value.name}</SelectItem>
+                    <SelectItem key={key} value={key}>
+                      {value.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -296,7 +337,9 @@ export default function HeatCoolingLoadInteractiveSite() {
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-black/5 bg-white text-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
                   {Object.entries(currentCategory.spaces).map(([key, value]) => (
-                    <SelectItem key={key} value={key}>{value.name}</SelectItem>
+                    <SelectItem key={key} value={key}>
+                      {value.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -304,9 +347,16 @@ export default function HeatCoolingLoadInteractiveSite() {
               <div className="rounded-[24px] border border-black/5 bg-[#fafafc] p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-slate-700">Selected</span>
-                  <Badge variant="secondary" className="rounded-full border-0 bg-sky-100 px-3 py-1 text-sky-700 hover:bg-sky-100">{currentSpace.name}</Badge>
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full border-0 bg-sky-100 px-3 py-1 text-sky-700 hover:bg-sky-100"
+                  >
+                    {currentSpace.name}
+                  </Badge>
                 </div>
+
                 <Separator className="my-4 bg-black/5" />
+
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <InfoStat label="Base Heating" value={`${currentSpace.heatingBase} W/m²`} />
                   <InfoStat label="Base Cooling" value={`${currentSpace.coolingBase} W/m²`} />
@@ -318,81 +368,143 @@ export default function HeatCoolingLoadInteractiveSite() {
           <div className="grid h-full auto-rows-fr grid-cols-1 gap-5 px-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xl:px-4">
             <FactorCard title="Climate" icon={<SunMedium className="h-4 w-4 text-sky-600" />}>
               <Select value={climate} onValueChange={setClimate}>
-                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent className="rounded-2xl border-black/5 bg-white text-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-                  {Object.entries(climateOptions).map(([key, value]) => <SelectItem key={key} value={key}>{value.name}</SelectItem>)}
+                  {Object.entries(climateOptions).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
+                      {value.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              <RangeBox heating={climateOptions[climate].heatingRange} cooling={climateOptions[climate].coolingRange} />
+              <RangeBox
+                heating={climateOptions[climate].heatingRange ?? '-'}
+                cooling={climateOptions[climate].coolingRange ?? '-'}
+              />
             </FactorCard>
 
             <FactorCard title="WWR" icon={<Square className="h-4 w-4 text-sky-600" />}>
               <Select value={wwr} onValueChange={setWwr}>
-                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent className="rounded-2xl border-black/5 bg-white text-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-                  {Object.entries(wwrOptions).map(([key, value]) => <SelectItem key={key} value={key}>{value.name}</SelectItem>)}
+                  {Object.entries(wwrOptions).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
+                      {value.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              <RangeBox heating={wwrOptions[wwr].heatingRange} cooling={wwrOptions[wwr].coolingRange} />
+              <RangeBox
+                heating={wwrOptions[wwr].heatingRange ?? '-'}
+                cooling={wwrOptions[wwr].coolingRange ?? '-'}
+              />
             </FactorCard>
 
             <FactorCard title="Shading" icon={<Blinds className="h-4 w-4 text-sky-600" />}>
               <Select value={shading} onValueChange={setShading}>
-                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent className="rounded-2xl border-black/5 bg-white text-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-                  {Object.entries(shadingOptions).map(([key, value]) => <SelectItem key={key} value={key}>{value.name}</SelectItem>)}
+                  {Object.entries(shadingOptions).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
+                      {value.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              <div className="rounded-2xl border border-black/5 bg-[#fafafc] px-3 py-2 text-[11px] leading-5 text-slate-500">Cooling factor: {shadingOptions[shading].coolingRange}</div>
+
+              <div className="rounded-2xl border border-black/5 bg-[#fafafc] px-3 py-2 text-[11px] leading-5 text-slate-500">
+                Cooling factor: {shadingOptions[shading].coolingRange ?? '-'}
+              </div>
             </FactorCard>
 
             <FactorCard title="Envelope" icon={<Shield className="h-4 w-4 text-sky-600" />}>
               <Select value={envelope} onValueChange={setEnvelope}>
-                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent className="rounded-2xl border-black/5 bg-white text-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-                  {Object.entries(envelopeOptions).map(([key, value]) => <SelectItem key={key} value={key}>{value.name}</SelectItem>)}
+                  {Object.entries(envelopeOptions).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
+                      {value.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              <RangeBox heating={envelopeOptions[envelope].heatingRange} cooling={envelopeOptions[envelope].coolingRange} />
+              <RangeBox
+                heating={envelopeOptions[envelope].heatingRange ?? '-'}
+                cooling={envelopeOptions[envelope].coolingRange ?? '-'}
+              />
             </FactorCard>
 
             <FactorCard title="Air / Ventilation" icon={<Wind className="h-4 w-4 text-sky-600" />}>
               <Select value={air} onValueChange={setAir}>
-                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent className="rounded-2xl border-black/5 bg-white text-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-                  {Object.entries(airOptions).map(([key, value]) => <SelectItem key={key} value={key}>{value.name}</SelectItem>)}
+                  {Object.entries(airOptions).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
+                      {value.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              <RangeBox heating={airOptions[air].heatingRange} cooling={airOptions[air].coolingRange} />
+              <RangeBox
+                heating={airOptions[air].heatingRange ?? '-'}
+                cooling={airOptions[air].coolingRange ?? '-'}
+              />
             </FactorCard>
 
             <FactorCard title="Internal Gains" icon={<Zap className="h-4 w-4 text-sky-600" />}>
               <Select value={internalGain} onValueChange={setInternalGain}>
-                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-12 rounded-2xl border-black/5 bg-[#f7f7fa] text-slate-900 shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent className="rounded-2xl border-black/5 bg-white text-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-                  {Object.entries(internalGainOptions).map(([key, value]) => <SelectItem key={key} value={key}>{value.name}</SelectItem>)}
+                  {Object.entries(internalGainOptions).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>
+                      {value.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              <RangeBox heating={internalGainOptions[internalGain].heatingRange} cooling={internalGainOptions[internalGain].coolingRange} />
+              <RangeBox
+                heating={internalGainOptions[internalGain].heatingRange ?? '-'}
+                cooling={internalGainOptions[internalGain].coolingRange ?? '-'}
+              />
             </FactorCard>
           </div>
 
           <LightPanel>
             <CardHeader className="border-b border-black/5 px-6 py-5">
               <CardTitle className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900">
-                <Zap className="h-5 w-5 text-sky-600" /> Load Output
+                <Zap className="h-5 w-5 text-sky-600" />
+                Load Output
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 flex-1 flex flex-col justify-between px-6 py-6">
+
+            <CardContent className="flex flex-1 flex-col justify-between space-y-6 px-6 py-6">
               <motion.div key={`${result.heating}-${result.cooling}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
                 <OutputCard label="Heating Load" value={result.heating} />
                 <div className="mt-4">
                   <OutputCard label="Cooling Load" value={result.cooling} />
                 </div>
               </motion.div>
+
               <div className="rounded-[24px] border border-black/5 bg-[#fafafc] p-5 text-slate-900">
-                <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-sky-600/70">Calculation Logic</div>
-                <p className="mt-2 text-sm leading-6 text-slate-500">Final load = program baseline × climate × WWR × shading × envelope × air / ventilation × internal gains.</p>
+                <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-sky-600/70">
+                  Calculation Logic
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Final load = program baseline × climate × WWR × shading × envelope × air / ventilation ×
+                  internal gains.
+                </p>
               </div>
             </CardContent>
           </LightPanel>
@@ -403,7 +515,11 @@ export default function HeatCoolingLoadInteractiveSite() {
 }
 
 function LightPanel({ children }: { children: React.ReactNode }) {
-  return <Card className="h-full flex flex-col rounded-[30px] border border-black/5 bg-white/82 shadow-[0_14px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl overflow-hidden">{children}</Card>;
+  return (
+    <Card className="h-full flex flex-col overflow-hidden rounded-[30px] border border-black/5 bg-white/82 shadow-[0_14px_36px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+      {children}
+    </Card>
+  );
 }
 
 function InfoStat({ label, value }: { label: string; value: string }) {
@@ -425,16 +541,24 @@ function OutputCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function FactorCard({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
+function FactorCard({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
-    <Card className="h-full flex flex-col rounded-[28px] border border-black/5 bg-white/82 shadow-[0_10px_28px_rgba(15,23,42,0.06)] backdrop-blur-xl overflow-hidden">
+    <Card className="h-full flex flex-col overflow-hidden rounded-[28px] border border-black/5 bg-white/82 shadow-[0_10px_28px_rgba(15,23,42,0.06)] backdrop-blur-xl">
       <CardHeader className="space-y-1 border-b border-black/5 px-6 py-5">
         <CardTitle className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-slate-900">
           {icon}
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-5 flex-1 px-6 py-6">{children}</CardContent>
+      <CardContent className="flex-1 space-y-5 px-6 py-6">{children}</CardContent>
     </Card>
   );
 }
