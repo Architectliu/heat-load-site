@@ -346,6 +346,7 @@ type StrategyForm = {
   wwr: WwrKey;
   shading: ShadingKey;
   ceiling: CeilingKey;
+  internalGain: InternalGainKey;
   spaceCount: number;
   highComfort: boolean;
   siteSources: SiteSourceAvailability;
@@ -787,6 +788,7 @@ export default function HeatCoolingLoadInteractiveSite() {
     wwr: 'baseline',
     shading: 'none',
     ceiling: 'standard',
+    internalGain: 'medium',
     spaceCount: 1,
     highComfort: false,
     siteSources: {
@@ -839,6 +841,7 @@ export default function HeatCoolingLoadInteractiveSite() {
       wwr: dominantEntry?.wwr ?? 'baseline',
       shading: dominantEntry?.shading ?? 'none',
       ceiling: dominantEntry?.ceiling ?? 'standard',
+      internalGain: dominantEntry?.internalGain ?? 'medium',
       spaceCount: calculatedEntries.filter((entry) => entry.enabled).length,
       highComfort: ['hotel', 'culture', 'residential', 'healthcare'].includes(dominantCategory),
       siteSources: {
